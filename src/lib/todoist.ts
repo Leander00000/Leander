@@ -4,7 +4,11 @@ const TODOIST_API_BASE_URL = "https://api.todoist.com/api/v1";
 const TODOIST_PAGE_LIMIT = 200;
 const MAX_PAGES = 100;
 
-export type TodoistTaskFilter = "today" | "overdue" | "today | overdue";
+export type TodoistTaskFilter =
+  | "today"
+  | "overdue"
+  | "today | overdue"
+  | "7 days";
 export type TodoistPriority = 1 | 2 | 3 | 4;
 export type TodoistDurationUnit = "minute" | "day";
 
@@ -377,6 +381,10 @@ export function getOverdueTasks(): Promise<TodoistTask[]> {
 
 export function getTodayAndOverdueTasks(): Promise<TodoistTask[]> {
   return getTasksByFilter("today | overdue");
+}
+
+export function getUpcomingTasks(): Promise<TodoistTask[]> {
+  return getTasksByFilter("7 days");
 }
 
 export async function quickAddTask(text: string): Promise<TodoistTask> {

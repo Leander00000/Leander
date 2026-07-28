@@ -14,6 +14,7 @@ export default async function TodayPage() {
     getHabits(viewer),
     getTasks(),
   ]);
+  const todoistKey = JSON.stringify(tasksResult);
 
   return (
     <div className="page-wrap">
@@ -27,7 +28,9 @@ export default async function TodayPage() {
       <div className="today-grid">
         <div className="today-main-column">
           <TodoistCard
-            initialTasks={tasksResult.tasks}
+            key={todoistKey}
+            initialTodayTasks={tasksResult.todayTasks}
+            initialUpcomingTasks={tasksResult.upcomingTasks}
             state={tasksResult.state}
             error={tasksResult.error}
           />

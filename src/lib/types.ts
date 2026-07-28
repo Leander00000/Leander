@@ -17,6 +17,7 @@ export type HabitView = {
   name: string;
   icon: string;
   color: string;
+  category: string;
   sortOrder: number;
   week: Array<WeekDay & { completed: boolean }>;
 };
@@ -27,10 +28,10 @@ export type DashboardTask = {
   description?: string;
   priority: number;
   project?: string;
+  dueDate?: string;
   dueLabel?: string;
   overdue: boolean;
   url?: string;
 };
 
 export type IntegrationState = "connected" | "preview" | "not-connected";
-

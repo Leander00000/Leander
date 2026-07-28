@@ -2,6 +2,10 @@ import "server-only";
 
 import { getDemoHabits } from "@/lib/demo-data";
 import { getWeekDates } from "@/lib/date";
+import {
+  DEFAULT_HABIT_CATEGORY,
+  DEFAULT_HABIT_ICON,
+} from "@/lib/habit-options";
 import { createClient } from "@/lib/supabase/server";
 import type { HabitView, Viewer } from "@/lib/types";
 
@@ -10,6 +14,7 @@ type HabitRow = {
   name: string;
   icon: string | null;
   color: string | null;
+  category: string | null;
   sort_order: number | null;
 };
 
@@ -32,7 +37,7 @@ export async function getHabits(viewer: Viewer): Promise<HabitsResult> {
   const supabase = await createClient();
   const { data: habitRows, error: habitsError } = await supabase
     .from("habits")
-    .select("id,name,icon,color,sort_order")
+    .select("id,name,icon,color,category,sort_order")
     .eq("user_id", viewer.id)
     .is("archived_at", null)
     .order("sort_order", { ascending: true })
@@ -78,8 +83,9 @@ export async function getHabits(viewer: Viewer): Promise<HabitsResult> {
     habits: habits.map((habit) => ({
       id: habit.id,
       name: habit.name,
-      icon: habit.icon || "○",
+      icon: habit.icon || DEFAULT_HABIT_ICON,
       color: habit.color || "#5f8f88",
+      category: habit.category || DEFAULT_HABIT_CATEGORY,
       sortOrder: habit.sort_order ?? 0,
       week: week.map((day) => ({
         ...day,

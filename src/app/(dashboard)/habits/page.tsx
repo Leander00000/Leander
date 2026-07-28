@@ -16,9 +16,9 @@ export default async function HabitsPage() {
   return (
     <div className="page-wrap narrow-page">
       <PageHeader
-        eyebrow="Your current week"
+        eyebrow="Your last seven days"
         title="Habits"
-        description="Check in, look back, and keep the list deliberately small."
+        description="Track each day, then edit, categorise, or remove habits when needed."
       />
       <HabitTracker
         initialHabits={result.habits}

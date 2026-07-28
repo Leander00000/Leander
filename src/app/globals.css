@@ -45,7 +45,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -65,7 +66,8 @@ a {
 
 button:focus-visible,
 a:focus-visible,
-input:focus-visible {
+input:focus-visible,
+select:focus-visible {
   outline: 3px solid rgb(169 87 63 / 34%);
   outline-offset: 3px;
 }
@@ -351,6 +353,12 @@ p {
   line-height: 1.15;
 }
 
+.card-helper {
+  margin: -8px 0 16px;
+  color: var(--ink-faint);
+  font-size: 0.76rem;
+}
+
 .card-kicker {
   margin-bottom: 5px;
   color: var(--ink-faint);
@@ -488,6 +496,53 @@ p {
   margin-top: 18px;
   padding-top: 14px;
   border-top: 1px solid #ebe5dc;
+}
+
+.todoist-tabs {
+  width: fit-content;
+  display: inline-flex;
+  gap: 4px;
+  margin: -4px 0 18px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+
+.todoist-tabs button {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 720;
+  cursor: pointer;
+}
+
+.todoist-tabs button[data-selected] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 2px 8px rgb(70 52 34 / 8%);
+}
+
+.todoist-tabs button span {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #ebe5dc;
+  color: var(--ink-faint);
+  font-size: 0.66rem;
+  text-align: center;
+}
+
+.todoist-tabs button[data-selected] span {
+  background: var(--clay-soft);
+  color: var(--clay-dark);
 }
 
 .task-groups {
@@ -697,7 +752,7 @@ p {
 }
 
 .habit-card[data-expanded] .habit-table-head {
-  grid-template-columns: minmax(180px, 1fr) minmax(280px, 1.4fr) 44px;
+  grid-template-columns: minmax(180px, 1fr) minmax(280px, 1.4fr) 96px;
 }
 
 .habit-week-head > span {
@@ -721,7 +776,7 @@ p {
 }
 
 .habit-card[data-expanded] .habit-row {
-  grid-template-columns: minmax(180px, 1fr) minmax(280px, 1.4fr) 44px;
+  grid-template-columns: minmax(180px, 1fr) minmax(280px, 1.4fr) 96px;
 }
 
 .habit-row:last-child {
@@ -752,6 +807,26 @@ p {
 .habit-name small {
   color: var(--ink-faint);
   font-size: 0.68rem;
+}
+
+.habit-details {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 3px;
+}
+
+.habit-details > span + span::before {
+  content: "·";
+  margin-right: 6px;
+  color: var(--line-strong);
+}
+
+.habit-category {
+  color: var(--clay-dark);
+  font-weight: 700;
 }
 
 .habit-icon {
@@ -808,21 +883,135 @@ p {
   opacity: 0.48;
 }
 
-.archive-button {
-  width: 44px;
-  height: 44px;
+.habit-today-list {
+  display: grid;
 }
 
-.add-habit-form {
-  position: relative;
+.habit-today-row {
+  min-height: 64px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee8df;
+}
+
+.habit-today-row:last-child {
+  border-bottom: 0;
+}
+
+.habit-today-toggle {
+  min-width: 112px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--surface-muted);
+  color: var(--ink-soft);
+  font-size: 0.74rem;
+  font-weight: 740;
+  cursor: pointer;
+}
+
+.habit-today-toggle:hover:not(:disabled) {
+  border-color: #9eb4ac;
+  background: var(--sage-soft);
+  color: #42675b;
+}
+
+.habit-today-toggle[data-completed] {
+  border-color: #a9bdb6;
+  background: var(--sage-soft);
+  color: #42675b;
+}
+
+.habit-actions {
   display: flex;
-  align-items: end;
-  gap: 10px;
-  margin-top: 18px;
-  padding: 14px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.habit-actions .icon-button {
+  width: 42px;
+  height: 42px;
+}
+
+.delete-button:hover:not(:disabled) {
+  border-color: #dfb3ae;
+  background: #fbefec;
+  color: var(--danger);
+}
+
+.button-danger {
+  border-color: #9b3931;
+  background: var(--danger);
+  color: white;
+}
+
+.button-danger:hover:not(:disabled) {
+  background: #87332c;
+}
+
+.habit-category-filter {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: -2px 0 18px;
+}
+
+.habit-category-filter button {
+  min-height: 32px;
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.habit-category-filter button:hover,
+.habit-category-filter button[data-selected] {
+  border-color: #d5b3a7;
+  background: var(--clay-soft);
+  color: var(--clay-dark);
+}
+
+.habit-details-form {
+  display: grid;
+  gap: 15px;
+  margin-top: 20px;
+  padding: 16px;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: var(--surface-muted);
+}
+
+.habit-form-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.habit-form-heading h3 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.1rem;
+}
+
+.habit-form-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 0.36fr);
+  gap: 12px;
 }
 
 .form-field {
@@ -831,13 +1020,15 @@ p {
 }
 
 .form-field label,
-.color-field legend {
+.color-field legend,
+.icon-picker-field legend {
   color: var(--ink-soft);
   font-size: 0.68rem;
   font-weight: 700;
 }
 
-.form-field input {
+.form-field input,
+.form-field select {
   height: 39px;
   padding: 7px 10px;
   border: 1px solid var(--line);
@@ -847,24 +1038,28 @@ p {
   outline: 0;
 }
 
-.icon-field {
-  width: 66px;
-}
-
-.icon-field input {
-  text-align: center;
-}
-
 .grow-field {
   min-width: 150px;
   flex: 1;
 }
 
+.category-field select {
+  width: 100%;
+}
+
+.icon-picker-field,
 .color-field {
-  min-width: 126px;
   margin: 0;
   padding: 0;
   border: 0;
+}
+
+.icon-picker-field > div {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 7px;
 }
 
 .color-field > div {
@@ -872,6 +1067,38 @@ p {
   display: flex;
   align-items: center;
   gap: 5px;
+  margin-top: 4px;
+}
+
+.icon-choice {
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.icon-choice input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.icon-choice span {
+  width: 38px;
+  height: 38px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 1rem;
+}
+
+.icon-choice:hover span,
+.icon-choice input:checked + span {
+  border-color: #bb826f;
+  background: var(--clay-soft);
+  box-shadow: 0 0 0 2px rgb(169 87 63 / 11%);
 }
 
 .color-choice {
@@ -901,6 +1128,18 @@ p {
   box-shadow:
     0 0 0 2px var(--surface),
     0 0 0 4px var(--choice-color);
+}
+
+.habit-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.habit-status {
+  margin: 14px 0 0;
+  color: var(--ink-soft);
+  font-size: 0.76rem;
 }
 
 .agenda-placeholder {
@@ -1470,13 +1709,8 @@ p {
     display: none;
   }
 
-  .add-habit-form {
-    align-items: stretch;
-    flex-wrap: wrap;
-  }
-
   .grow-field {
-    flex-basis: calc(100% - 80px);
+    min-width: 0;
   }
 }
 
@@ -1588,7 +1822,7 @@ p {
     grid-column: 1 / -1;
   }
 
-  .habit-card[data-expanded] .archive-button {
+  .habit-card[data-expanded] .habit-actions {
     grid-column: 2;
     grid-row: 1;
   }
@@ -1612,26 +1846,21 @@ p {
     height: 44px;
   }
 
-  .add-habit-form {
-    display: grid;
-    grid-template-columns: 64px minmax(0, 1fr);
+  .habit-form-fields {
+    grid-template-columns: 1fr;
   }
 
-  .grow-field {
-    min-width: 0;
+  .todoist-tabs {
+    width: 100%;
   }
 
-  .color-field {
-    grid-column: 1 / -1;
+  .todoist-tabs button {
+    flex: 1;
+    justify-content: center;
   }
 
-  .add-habit-form .button {
-    grid-column: 1 / -1;
-  }
-
-  .add-habit-form > .icon-button {
-    position: absolute;
-    right: 30px;
+  .habit-details-form {
+    padding: 14px;
   }
 
   .quick-links-grid {
@@ -1668,6 +1897,20 @@ p {
 
   .status-pill {
     padding-inline: 7px;
+  }
+
+  .habit-today-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 11px 0;
+  }
+
+  .habit-today-toggle {
+    width: 100%;
+  }
+
+  .habit-actions {
+    gap: 4px;
   }
 
   .quick-add-form {
