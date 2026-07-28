@@ -5,18 +5,17 @@ calendar placeholder, and direct links to Google services.
 
 ## Version 1
 
-- **Today:** overdue and today’s Todoist tasks, quick add, task completion,
-  today’s habits, calendar shortcut, and quick links.
+- **Today:** overdue and today's Todoist tasks, quick add, task completion,
+  today's habits, calendar shortcut, and quick links.
 - **Habits:** add and archive habits, check any day in the current seven-day
   view, and see weekly completion.
 - **Links:** direct access to Drive, Keep, Calendar, Gmail, and Todoist.
-- **Settings:** connection status and the signed-in owner account.
-- **Privacy:** one allowed email at the application layer, owner-scoped
-  Supabase row-level security, no anonymous table access, and no private keys in
-  browser code.
+- **Settings:** connection status and a control to lock the dashboard.
+- **Privacy:** a server-checked PIN, owner-scoped Supabase row-level security,
+  no anonymous table access, and no private keys in browser code.
 
 Google Drive and Keep are links in V1 rather than embedded applications. Their
-full interfaces are not dependable inside another website, and Google Keep’s
+full interfaces are not dependable inside another website, and Google Keep's
 API is intended for managed Workspace administration rather than a personal
 notes client.
 
@@ -57,8 +56,8 @@ project. They create:
 - explicit authenticated-role grants
 - owner-scoped select, insert, update, and delete policies
 
-Both tables have row-level security enabled. Anonymous access is explicitly
-revoked.
+Both tables have row-level security enabled. Unauthenticated access is
+explicitly revoked.
 
 For a fresh Supabase project:
 
@@ -67,29 +66,29 @@ supabase link --project-ref your-project-ref
 supabase db push
 ```
 
-## Google sign-in
+## Private PIN
 
-The login page uses Google through Supabase Auth.
+Google sign-in is not required. Every successful PIN unlock signs in to one
+permanent Supabase owner profile, so the same habits appear in every browser.
+The PIN is never included in browser JavaScript or committed to GitHub.
 
-1. In Google Cloud, create an OAuth 2.0 **Web application**.
-2. Add this Google authorized redirect URI:
-   `https://uztowxvvzuonlbasifnq.supabase.co/auth/v1/callback`
-3. In Supabase, open **Authentication → Sign In / Providers → Google**, enable
-   Google, and enter the Google client ID and secret.
-4. In **Authentication → URL Configuration**, set the Site URL to the final
-   Vercel URL.
-5. Add `http://localhost:3000/auth/callback` and
-   `https://your-vercel-domain/auth/callback` to the allowed redirect URLs.
-6. Set `OWNER_EMAIL` to the same Google email address.
+The owner profile uses the internal email
+`leander-dashboard-uztowxvvzuonlbasifnq@example.com`. Its real Supabase
+password combines the four-digit PIN with the private
+`DASHBOARD_PIN_PEPPER` value. The owner profile must be created once in
+Supabase Auth with that combined password.
 
-The application rejects signed-in accounts whose email does not match
-`OWNER_EMAIL`. After the owner has signed in once, disabling new-user signups in
-Supabase provides an additional single-user safeguard.
+Habit rows remain isolated by `auth.uid()`. Locking the dashboard signs out, and
+entering the PIN again returns to the same profile and data.
+
+The database is expected to contain no habit rows before first use. `habits`
+receives a row after a habit is added, and `habit_checkins` receives a row after
+a habit is checked.
 
 ## Todoist
 
 Create a personal API token in Todoist under
-**Settings → Integrations → Developer**, then add it as
+**Settings > Integrations > Developer**, then add it as
 `TODOIST_API_TOKEN`. The token is used only in server code.
 
 V1 reads the `today | overdue` filter and supports quick add and completion. The
@@ -103,13 +102,16 @@ Import the GitHub repository into Vercel and add these variables for
 ```text
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-OWNER_EMAIL
+DASHBOARD_PIN_PEPPER
 TODOIST_API_TOKEN
 NEXT_PUBLIC_DEMO_MODE=false
 ```
 
-Use the active publishable key from **Supabase → Project Settings → API Keys**.
+Use the active publishable key from **Supabase > Project Settings > API Keys**.
 Do not use or expose a secret or `service_role` key.
+
+Environment-variable changes apply only to new deployments. Redeploy after
+adding or changing them.
 
 Vercel will detect Next.js and use:
 

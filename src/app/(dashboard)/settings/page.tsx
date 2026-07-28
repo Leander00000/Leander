@@ -3,7 +3,7 @@ import {
   CheckCircle2,
   Database,
   ExternalLink,
-  LogOut,
+  LockKeyhole,
 } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -57,7 +57,7 @@ export default async function SettingsPage() {
               </span>
               <span className="setting-copy">
                 <strong>Supabase</strong>
-                <small>Private habits and account access</small>
+                <small>Private habits and browser session</small>
               </span>
               <span className="status-pill">
                 {viewer.isDemo ? "Preview" : "Connected"}
@@ -80,7 +80,7 @@ export default async function SettingsPage() {
           <div className="card-heading">
             <div>
               <p className="card-kicker">Owner</p>
-              <h2>Account</h2>
+              <h2>Access</h2>
             </div>
           </div>
           <div className="account-settings-row">
@@ -99,8 +99,8 @@ export default async function SettingsPage() {
             ) : (
               <form action={signOutAction}>
                 <button className="text-button danger-text" type="submit">
-                  <LogOut aria-hidden="true" size={16} />
-                  Sign out
+                  <LockKeyhole aria-hidden="true" size={16} />
+                  Lock dashboard
                 </button>
               </form>
             )}

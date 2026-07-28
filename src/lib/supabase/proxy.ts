@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { getAppMode, getOwnerEmail } from "@/lib/config";
 
-const PUBLIC_PATHS = ["/login", "/auth", "/setup"];
+const PUBLIC_PATHS = ["/login", "/setup"];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some(
@@ -78,4 +78,3 @@ export async function updateSession(request: NextRequest) {
 
   return response;
 }
-

@@ -43,7 +43,7 @@ export async function getViewer(): Promise<Viewer | null> {
 
   return {
     id,
-    email,
+    email: "Single private profile",
     name: "Leander",
     isDemo: false,
   };
@@ -58,4 +58,3 @@ export async function requireViewer() {
 
   return viewer;
 }
-

@@ -11,7 +11,7 @@ export default function SetupPage() {
         <h1>Leander is ready for its private keys.</h1>
         <p className="setup-intro">
           The production site is intentionally locked until its Supabase
-          project and owner account are configured in Vercel.
+          project and single-profile PIN are configured in Vercel.
         </p>
         <ol className="setup-steps">
           <li>
@@ -24,8 +24,8 @@ export default function SetupPage() {
           <li>
             <KeyRound aria-hidden="true" />
             <span>
-              <strong>Choose the owner</strong>
-              Set the one email address allowed to sign in.
+              <strong>Connect the owner profile</strong>
+              Add the private PIN pepper used by the single Supabase profile.
             </span>
           </li>
           <li>
@@ -44,4 +44,3 @@ export default function SetupPage() {
     </main>
   );
 }
-

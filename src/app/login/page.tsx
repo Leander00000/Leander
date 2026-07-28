@@ -1,4 +1,4 @@
-import { ArrowLeft, LockKeyhole } from "lucide-react";
+import { ArrowLeft, KeyRound } from "lucide-react";
 import Link from "next/link";
 
 import { LoginForm } from "@/components/login-form";
@@ -19,14 +19,11 @@ export default function LoginPage() {
 
         <div className="auth-copy">
           <span className="auth-icon">
-            <LockKeyhole aria-hidden="true" size={22} />
+            <KeyRound aria-hidden="true" size={22} />
           </span>
           <p className="kicker">Private dashboard</p>
           <h1>Your day, in one quiet place.</h1>
-          <p>
-            Sign in with the single Google account allowed to open this
-            dashboard.
-          </p>
+          <p>Enter your short PIN. No Google account is needed.</p>
         </div>
 
         {mode === "demo" ? (
@@ -39,8 +36,8 @@ export default function LoginPage() {
         )}
 
         <p className="auth-note">
-          Access is checked on the server. Your Todoist and Google credentials
-          are never sent to the browser.
+          The PIN is checked on the server against one private Supabase profile.
+          It is never included in the website code.
         </p>
       </section>
       <aside className="auth-art" aria-hidden="true">
@@ -57,4 +54,3 @@ export default function LoginPage() {
     </main>
   );
 }
-

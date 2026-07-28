@@ -1,60 +1,53 @@
 "use client";
 
-import { ArrowRight, LoaderCircle } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight, KeyRound, LoaderCircle } from "lucide-react";
+import { useActionState } from "react";
 
-import { createClient } from "@/lib/supabase/client";
+import { loginAction, type LoginState } from "@/app/actions/auth";
 
 export function LoginForm() {
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function signIn() {
-    setPending(true);
-    setError(null);
-
-    try {
-      const supabase = createClient();
-      const { error: signInError } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-
-      if (signInError) {
-        throw signInError;
-      }
-    } catch {
-      setError("Sign-in could not be started. Please try again.");
-      setPending(false);
-    }
-  }
+  const initialState: LoginState = { error: null };
+  const [state, formAction, pending] = useActionState(
+    loginAction,
+    initialState,
+  );
 
   return (
-    <div className="login-actions">
+    <form className="login-actions" action={formAction}>
+      <label className="pin-field">
+        <span>Dashboard PIN</span>
+        <input
+          name="password"
+          type="password"
+          inputMode="numeric"
+          autoComplete="current-password"
+          placeholder="Enter your PIN"
+          pattern="[0-9]{4}"
+          maxLength={4}
+          required
+          autoFocus
+          aria-invalid={Boolean(state.error)}
+          aria-describedby={state.error ? "login-error" : undefined}
+        />
+      </label>
       <button
         className="button button-primary button-wide"
-        type="button"
-        onClick={signIn}
+        type="submit"
         disabled={pending}
       >
         {pending ? (
           <LoaderCircle className="spin" aria-hidden="true" size={18} />
         ) : (
-          <span className="google-g" aria-hidden="true">
-            G
-          </span>
+          <KeyRound aria-hidden="true" size={18} />
         )}
-        Continue with Google
+        Unlock dashboard
         {!pending ? <ArrowRight aria-hidden="true" size={18} /> : null}
       </button>
-      {error ? (
-        <p className="form-error" role="alert">
-          {error}
+      {state.error ? (
+        <p className="form-error" id="login-error" role="alert">
+          {state.error}
         </p>
       ) : null}
-    </div>
+    </form>
   );
 }
-
