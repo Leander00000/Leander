@@ -8,8 +8,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value:
-              "frame-src 'self' https://embed.styledcalendar.com; frame-ancestors 'none';",
+            value: "frame-ancestors 'none';",
           },
         ],
       },

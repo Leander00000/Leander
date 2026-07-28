@@ -11,7 +11,8 @@ export default function SetupPage() {
         <h1>Leander is ready for its private keys.</h1>
         <p className="setup-intro">
           The production site is intentionally locked until its Supabase
-          project and single-profile PIN are configured in Vercel.
+          project, owner account, stable origin, and Google OAuth clients are
+          configured.
         </p>
         <ol className="setup-steps">
           <li>
@@ -25,14 +26,16 @@ export default function SetupPage() {
             <KeyRound aria-hidden="true" />
             <span>
               <strong>Connect the owner profile</strong>
-              Add the private PIN pepper used by the single Supabase profile.
+              Add the owner email and enable the dedicated sign-in Google
+              project in Supabase Auth.
             </span>
           </li>
           <li>
             <Rocket aria-hidden="true" />
             <span>
               <strong>Redeploy</strong>
-              Vercel will publish the private dashboard.
+              Add the stable app origin and separate Calendar OAuth secrets in
+              Vercel, then publish the dashboard.
             </span>
           </li>
         </ol>
