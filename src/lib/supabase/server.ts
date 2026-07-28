@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 import { hasSupabaseConfig } from "@/lib/config";
+import { SUPABASE_COOKIE_OPTIONS } from "@/lib/supabase/cookie-options";
 
 export async function createClient() {
   if (!hasSupabaseConfig()) {
@@ -14,6 +15,7 @@ export async function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
+      cookieOptions: SUPABASE_COOKIE_OPTIONS,
       cookies: {
         getAll() {
           return cookieStore.getAll();
@@ -31,4 +33,3 @@ export async function createClient() {
     },
   );
 }
-

@@ -2,7 +2,8 @@ import "server-only";
 
 import { redirect } from "next/navigation";
 
-import { getAppMode, getOwnerEmail } from "@/lib/config";
+import { getAppMode } from "@/lib/config";
+import { isOwnerOAuthSession } from "@/lib/owner-session";
 import { createClient } from "@/lib/supabase/server";
 import type { Viewer } from "@/lib/types";
 
@@ -31,13 +32,13 @@ export async function getViewer(): Promise<Viewer | null> {
     return null;
   }
 
-  const email =
-    typeof data.claims.email === "string"
-      ? data.claims.email.trim().toLowerCase()
-      : "";
+  if (!isOwnerOAuthSession(data.claims)) {
+    return null;
+  }
+
   const id = typeof data.claims.sub === "string" ? data.claims.sub : "";
 
-  if (!id || email !== getOwnerEmail()) {
+  if (!id) {
     return null;
   }
 

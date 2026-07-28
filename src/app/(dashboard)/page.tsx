@@ -7,12 +7,14 @@ import { requireViewer } from "@/lib/auth";
 import { getHabits } from "@/lib/data/habits";
 import { getTasks } from "@/lib/data/tasks";
 import { formatFullDate, getGreeting } from "@/lib/date";
+import { getGoogleCalendarAgenda } from "@/lib/google-calendar/data";
 
 export default async function TodayPage() {
   const viewer = await requireViewer();
-  const [habitsResult, tasksResult] = await Promise.all([
+  const [habitsResult, tasksResult, calendarAgenda] = await Promise.all([
     getHabits(viewer),
     getTasks(),
+    getGoogleCalendarAgenda(viewer),
   ]);
   const todoistKey = JSON.stringify(tasksResult);
 
@@ -40,7 +42,7 @@ export default async function TodayPage() {
           />
         </div>
         <aside className="today-side-column">
-          <AgendaCard />
+          <AgendaCard agenda={calendarAgenda} />
           <QuickLinks />
         </aside>
       </div>

@@ -10,8 +10,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@googleapis/calendar": "15.0.0",
     "@supabase/ssr": "0.12.3",
     "@supabase/supabase-js": "2.110.8",
+    "google-auth-library": "10.5.0",
     "lucide-react": "1.27.0",
     "next": "16.2.12",
     "react": "19.2.4",

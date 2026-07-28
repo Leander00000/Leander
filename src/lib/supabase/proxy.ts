@@ -1,14 +1,32 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-import { getAppMode, getOwnerEmail } from "@/lib/config";
+import { getAppMode } from "@/lib/config";
+import { isOwnerOAuthSession } from "@/lib/owner-session";
+import { SUPABASE_COOKIE_OPTIONS } from "@/lib/supabase/cookie-options";
 
-const PUBLIC_PATHS = ["/login", "/setup"];
+const PUBLIC_PATHS = ["/auth", "/login", "/setup"];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some(
     (path) => pathname === path || pathname.startsWith(`${path}/`),
   );
+}
+
+function redirectWithSessionCookies(
+  request: NextRequest,
+  response: NextResponse,
+  pathname: string,
+) {
+  const url = request.nextUrl.clone();
+  url.pathname = pathname;
+  url.search = "";
+
+  const redirectResponse = NextResponse.redirect(url);
+  response.cookies.getAll().forEach((cookie) => {
+    redirectResponse.cookies.set(cookie);
+  });
+  return redirectResponse;
 }
 
 export async function updateSession(request: NextRequest) {
@@ -34,6 +52,7 @@ export async function updateSession(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
+      cookieOptions: SUPABASE_COOKIE_OPTIONS,
       cookies: {
         getAll() {
           return request.cookies.getAll();
@@ -59,21 +78,14 @@ export async function updateSession(request: NextRequest) {
 
   const { data } = await supabase.auth.getClaims();
   const claims = data?.claims;
-  const ownerEmail = getOwnerEmail();
-  const signedInEmail =
-    typeof claims?.email === "string" ? claims.email.toLowerCase() : "";
-  const isOwner = Boolean(claims && signedInEmail === ownerEmail);
+  const isOwner = isOwnerOAuthSession(claims);
 
   if (!isOwner && !isPublicPath(pathname)) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = "/login";
-    return NextResponse.redirect(loginUrl);
+    return redirectWithSessionCookies(request, response, "/login");
   }
 
   if (isOwner && pathname === "/login") {
-    const homeUrl = request.nextUrl.clone();
-    homeUrl.pathname = "/";
-    return NextResponse.redirect(homeUrl);
+    return redirectWithSessionCookies(request, response, "/");
   }
 
   return response;
