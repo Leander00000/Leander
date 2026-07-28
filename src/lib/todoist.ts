@@ -52,7 +52,6 @@ export interface TodoistTask {
   description: string;
   note_count: number;
   day_order: number;
-  goal_ids: string[];
   completed_count: number;
   postponed_count: number;
 }
@@ -185,7 +184,6 @@ function isTodoistTask(value: unknown): value is TodoistTask {
     typeof value.description === "string" &&
     isInteger(value.note_count) &&
     isInteger(value.day_order) &&
-    isStringArray(value.goal_ids) &&
     isInteger(value.completed_count) &&
     isInteger(value.postponed_count)
   );
