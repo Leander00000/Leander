@@ -72,11 +72,10 @@ Google sign-in is not required. Every successful PIN unlock signs in to one
 permanent Supabase owner profile, so the same habits appear in every browser.
 The PIN is never included in browser JavaScript or committed to GitHub.
 
-The owner profile uses the internal email
-`leander-dashboard-uztowxvvzuonlbasifnq@example.com`. Its real Supabase
-password combines the four-digit PIN with the private
-`DASHBOARD_PIN_PEPPER` value. The owner profile must be created once in
-Supabase Auth with that combined password.
+Create the owner profile once in Supabase Auth, using the four-digit PIN as its
+password. Add that profile's email address to the server-only `OWNER_EMAIL`
+environment variable. The email is not shown on the dashboard or included in
+browser JavaScript.
 
 Habit rows remain isolated by `auth.uid()`. Locking the dashboard signs out, and
 entering the PIN again returns to the same profile and data.
@@ -102,7 +101,7 @@ Import the GitHub repository into Vercel and add these variables for
 ```text
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-DASHBOARD_PIN_PEPPER
+OWNER_EMAIL
 TODOIST_API_TOKEN
 NEXT_PUBLIC_DEMO_MODE=false
 ```

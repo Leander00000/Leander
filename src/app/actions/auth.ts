@@ -2,11 +2,7 @@
 
 import { redirect } from "next/navigation";
 
-import {
-  getAppMode,
-  getDashboardPinPepper,
-  getOwnerEmail,
-} from "@/lib/config";
+import { getAppMode, getOwnerEmail } from "@/lib/config";
 import { createClient } from "@/lib/supabase/server";
 
 export type LoginState = {
@@ -34,7 +30,7 @@ export async function loginAction(
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({
     email: getOwnerEmail(),
-    password: `${password}:${getDashboardPinPepper()}`,
+    password,
   });
 
   if (error) {
