@@ -1,12 +1,12 @@
 # Leander
 
-A private personal dashboard for Todoist tasks, weekly habits, an honest
-calendar placeholder, and direct links to Google services.
+A private personal dashboard for Todoist tasks, weekly habits, an embedded
+Google Calendar view, and direct links to Google services.
 
 ## Version 1
 
 - **Today:** overdue and today's Todoist tasks, quick add, task completion,
-  today's habits, calendar shortcut, and quick links.
+  today's habits, an optional embedded calendar, and quick links.
 - **Habits:** add and archive habits, check any day in the current seven-day
   view, and see weekly completion.
 - **Links:** direct access to Drive, Keep, Calendar, Gmail, and Todoist.
@@ -14,10 +14,28 @@ calendar placeholder, and direct links to Google services.
 - **Privacy:** a server-checked PIN, owner-scoped Supabase row-level security,
   no anonymous table access, and no private keys in browser code.
 
-Google Drive and Keep are links in V1 rather than embedded applications. Their
-full interfaces are not dependable inside another website, and Google Keep's
-API is intended for managed Workspace administration rather than a personal
-notes client.
+Google Drive and Keep remain direct links. Their full interfaces are not
+dependable inside another website, and Google Keep's API is intended for
+managed Workspace administration rather than a personal notes client.
+
+## Google Calendar
+
+The Agenda card supports a responsive Styled Calendar iframe. Add its URL as
+`CALENDAR_EMBED_URL`; no Google access token is stored in this app or in
+Supabase. The URL must use this format:
+
+```text
+https://embed.styledcalendar.com/#your_embed_id
+```
+
+In Styled Calendar, connect a dedicated Google calendar, configure its mobile
+layout as a list or agenda, and copy the `src` value from the generated iframe.
+
+Treat the embed and everything it displays as public. The URL is sent to the
+browser and can be copied; the dashboard PIN does not turn it into a private
+Google Calendar view. Use a separate calendar containing only event summaries
+that are safe to display. The direct “Open Google Calendar” button remains
+available when the embed is absent or unavailable.
 
 ## Technology
 
@@ -103,6 +121,7 @@ NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 OWNER_EMAIL
 TODOIST_API_TOKEN
+CALENDAR_EMBED_URL
 NEXT_PUBLIC_DEMO_MODE=false
 ```
 

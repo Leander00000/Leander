@@ -391,6 +391,12 @@ p {
   color: #766b5e;
 }
 
+.status-invalid {
+  border-color: #e4c3bd;
+  background: #faece9;
+  color: var(--danger);
+}
+
 .icon-button {
   width: 44px;
   height: 44px;
@@ -1174,23 +1180,29 @@ p {
   line-height: 1.55;
 }
 
-.agenda-preview {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 20px 0;
-  padding: 12px;
-  border: 1px dashed var(--line-strong);
-  border-radius: 11px;
-  color: var(--ink-faint);
-  font-size: 0.69rem;
+.calendar-embed-shell {
+  overflow: hidden;
+  position: relative;
+  height: clamp(420px, 58vh, 620px);
+  margin: 0 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--surface-muted);
 }
 
-.preview-line {
-  height: 5px;
-  flex: 1;
-  border-radius: 99px;
-  background: #e9e3da;
+.calendar-embed {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+  background: var(--surface);
+}
+
+.calendar-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 18px;
 }
 
 .quick-links-grid {

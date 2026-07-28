@@ -10,6 +10,7 @@ import type { Metadata } from "next";
 import { signOutAction } from "@/app/actions/auth";
 import { PageHeader } from "@/components/page-header";
 import { requireViewer } from "@/lib/auth";
+import { getCalendarEmbedConfig } from "@/lib/calendar";
 
 export const metadata: Metadata = {
   title: "Settings",
@@ -19,6 +20,8 @@ export default async function SettingsPage() {
   const viewer = await requireViewer();
   const todoistConnected =
     viewer.isDemo || Boolean(process.env.TODOIST_API_TOKEN?.trim());
+  const calendar = getCalendarEmbedConfig();
+  const calendarConfigured = calendar.status === "configured";
 
   return (
     <div className="page-wrap narrow-page">
@@ -69,9 +72,29 @@ export default async function SettingsPage() {
               </span>
               <span className="setting-copy">
                 <strong>Google Calendar</strong>
-                <small>Direct link in V1; event sync can follow</small>
+                <small>
+                  {calendarConfigured
+                    ? "Responsive Styled Calendar agenda"
+                    : calendar.status === "invalid"
+                      ? "The configured URL is not a Styled Calendar embed"
+                      : "Add a Styled Calendar embed URL"}
+                </small>
               </span>
-              <span className="status-pill status-planned">Planned</span>
+              <span
+                className={`status-pill ${
+                  calendar.status === "invalid"
+                    ? "status-invalid"
+                    : calendarConfigured
+                      ? ""
+                      : "status-planned"
+                }`}
+              >
+                {calendarConfigured
+                  ? "Embed configured"
+                  : calendar.status === "invalid"
+                    ? "Invalid URL"
+                    : "Not configured"}
+              </span>
             </div>
           </div>
         </section>
