@@ -27,6 +27,7 @@ export type DashboardTask = {
   content: string;
   description?: string;
   priority: number;
+  completionCount?: number;
   project?: string;
   dueDate?: string;
   dueLabel?: string;

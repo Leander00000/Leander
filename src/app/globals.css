@@ -2181,3 +2181,52 @@ a.agenda-event:hover {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Progress keeps the dashboard's warm palette and compact mobile layout. */
+.progress-card { margin-bottom: 24px; padding: 24px; background: linear-gradient(115deg, var(--surface), #edf2e8); }
+.progress-top { display: flex; align-items: center; gap: 16px; }
+.level-emblem { width: 58px; height: 68px; flex-shrink: 0; border-radius: 18px; background: var(--sage); color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.level-emblem strong { font-size: 23px; line-height: 1.2; }
+.progress-heading { flex: 1; min-width: 0; }
+.progress-heading h2 { margin: 0; font-family: var(--serif); font-size: 27px; }
+.progress-heading p { margin-bottom: 0; font-size: 12px; color: var(--ink-soft); }
+.streak-pill { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; max-width: 110px; color: var(--clay-dark); font-weight: 650; }
+.streak-pill small { width: 100%; text-align: center; font-size: 10px; font-weight: 400; }
+.xp-meter, .quest-meter { display: block; appearance: none; width: 100%; height: 9px; border: 0; border-radius: 20px; overflow: hidden; margin: 18px 0; background: var(--line); }
+progress::-webkit-progress-bar { background: var(--line); border-radius: 20px; }
+progress::-webkit-progress-value { background: var(--sage); border-radius: 20px; }
+progress::-moz-progress-bar { background: var(--sage); border-radius: 20px; }
+.quest-meter { height: 5px; margin: 10px 0 16px; }
+.quest-meter::-webkit-progress-value { background: var(--clay); }
+.quest-meter::-moz-progress-bar { background: var(--clay); }
+.daily-quest { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px; }
+.daily-quest small { display: block; color: var(--ink-soft); font-size: 11px; }
+.daily-quest > strong { white-space: nowrap; }
+.milestone-details summary { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 12px; color: var(--ink-soft); }
+.milestone-details summary::after { content: "+"; margin-left: auto; }
+.milestone-details[open] summary::after { content: "−"; }
+.badge-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 15px; }
+.milestone { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; border: 1px dashed var(--line-strong); border-radius: 12px; padding: 12px; font-size: 12px; color: var(--ink-soft); }
+.milestone small { font-size: 11px; }
+.milestone > span { font-size: 10px; }
+.milestone[data-earned] { border-style: solid; border-color: #b2c4b8; color: #365d4b; background: #e3ede8; }
+.progress-rules { margin: 15px 0 0; font-size: 11px; color: var(--ink-soft); }
+.xp-tag { color: #426451; font-size: 10px; font-weight: 650; }
+.habit-streak { display: inline-flex; align-items: center; gap: 3px; color: var(--clay-dark); font-size: 10px; }
+.action-feedback { margin: 0; padding: 0 22px; font-size: 12px; color: var(--ink-soft); }
+.action-feedback:not(:empty) { padding-bottom: 16px; }
+@media (max-width: 600px) {
+  .progress-card { padding: 18px; margin-bottom: 16px; }
+  .progress-top { gap: 10px; }
+  .level-emblem { width: 44px; height: 56px; border-radius: 13px; }
+  .progress-heading h2 { font-size: 23px; }
+  .progress-heading .card-kicker { font-size: 9px; }
+  .progress-heading p { font-size: 10px; }
+  .streak-pill { max-width: 73px; font-size: 12px; }
+  .badge-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .daily-quest { font-size: 11px; }
+  .daily-quest small { max-width: 180px; font-size: 10px; }
+}
+
+.pending-progress { margin: 12px 0; padding: 12px; background: var(--clay-soft); border-radius: 10px; font-size: 12px; }
+.pending-progress p { margin-bottom: 6px; }

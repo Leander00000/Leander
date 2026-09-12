@@ -2,6 +2,7 @@
 
 import {
   Check,
+  Flame,
   ChevronRight,
   LoaderCircle,
   Pencil,
@@ -12,6 +13,7 @@ import {
 import Link from "next/link";
 import {
   useMemo,
+  useRef,
   useState,
   useTransition,
   type CSSProperties,
@@ -23,6 +25,7 @@ import {
   toggleHabitAction,
   updateHabitAction,
 } from "@/app/actions/habits";
+import { useProgress } from "@/components/progress-provider";
 import { getWeekDates } from "@/lib/date";
 import {
   DEFAULT_HABIT_CATEGORY,
@@ -54,6 +57,8 @@ function HabitIdentity({
   habit: HabitView;
   showProgress: boolean;
 }) {
+  const { result } = useProgress();
+  const streak = result.progress?.habitStreaks[habit.id]?.current ?? 0;
   const completedCount = habit.week.filter((day) => day.completed).length;
 
   return (
@@ -69,6 +74,13 @@ function HabitIdentity({
         <strong>{habit.name}</strong>
         <small className="habit-details">
           <span className="habit-category">{habit.category}</span>
+          <span className="xp-tag">+10 XP</span>
+          {streak > 0 ? (
+            <span className="habit-streak">
+              <Flame size={12} aria-hidden="true" />
+              {streak} day streak
+            </span>
+          ) : null}
           {showProgress ? (
             <span>{Math.round((completedCount / 7) * 100)}% last 7 days</span>
           ) : null}
@@ -210,6 +222,8 @@ export function HabitTracker({
   error,
   expanded = false,
 }: HabitTrackerProps) {
+  const { refresh: refreshProgress } = useProgress();
+  const checkinLocks = useRef(new Set<string>());
   const [habits, setHabits] = useState(initialHabits);
   const [showAdd, setShowAdd] = useState(false);
   const [editingHabitId, setEditingHabitId] = useState<string | null>(null);
@@ -224,9 +238,8 @@ export function HabitTracker({
 
   const todayCompleted = useMemo(
     () =>
-      habits.filter(
-        (habit) => habit.week.find((day) => day.isToday)?.completed,
-      ).length,
+      habits.filter((habit) => habit.week.find((day) => day.isToday)?.completed)
+        .length,
     [habits],
   );
 
@@ -252,11 +265,7 @@ export function HabitTracker({
   const editingHabit =
     habits.find((habit) => habit.id === editingHabitId) ?? null;
 
-  function updateCheckin(
-    habitId: string,
-    date: string,
-    completed: boolean,
-  ) {
+  function updateCheckin(habitId: string, date: string, completed: boolean) {
     setHabits((current) =>
       current.map((habit) =>
         habit.id === habitId
@@ -288,32 +297,49 @@ export function HabitTracker({
     if (
       !habit ||
       !day ||
-      pendingCheckins.has(pendingKey) ||
+      checkinLocks.current.has(pendingKey) ||
       (!expanded && !day.isToday)
     ) {
       return;
     }
 
+    checkinLocks.current.add(pendingKey);
     const nextCompleted = !day.completed;
     setStatus(null);
     markCheckinPending(pendingKey, true);
     updateCheckin(habitId, date, nextCompleted);
 
     startCheckinTransition(async () => {
-      const result = await toggleHabitAction({
-        habitId,
-        date,
-        completed: nextCompleted,
-      });
+      try {
+        const result = await toggleHabitAction({
+          habitId,
+          date,
+          completed: nextCompleted,
+        });
 
-      if (!result.ok) {
+        if (!result.ok) {
+          updateCheckin(habitId, date, day.completed);
+          setStatus(result.message ?? "That check-in was not saved.");
+        } else {
+          setStatus(
+            nextCompleted
+              ? "Check-in saved. +10 XP!"
+              : "Check-in removed. 10 XP removed.",
+          );
+          const id = `habit:${habitId}:${date}`;
+          await refreshProgress(
+            nextCompleted
+              ? { activity: { id, kind: "habit", habitId, date } }
+              : { removeId: id },
+          );
+        }
+      } catch {
         updateCheckin(habitId, date, day.completed);
-        setStatus(result.message ?? "That check-in was not saved.");
-      } else {
-        setStatus(nextCompleted ? "Check-in saved." : "Check-in removed.");
+        setStatus("Could not confirm the check-in. Please try again.");
+      } finally {
+        checkinLocks.current.delete(pendingKey);
+        markCheckinPending(pendingKey, false);
       }
-
-      markCheckinPending(pendingKey, false);
     });
   }
 
@@ -321,9 +347,7 @@ export function HabitTracker({
     const name = String(formData.get("name") ?? "");
     const icon = String(formData.get("icon") ?? DEFAULT_HABIT_ICON);
     const color = String(formData.get("color") ?? COLORS[0]);
-    const category = String(
-      formData.get("category") ?? DEFAULT_HABIT_CATEGORY,
-    );
+    const category = String(formData.get("category") ?? DEFAULT_HABIT_CATEGORY);
     setStatus(null);
 
     startSavingTransition(async () => {
@@ -359,9 +383,7 @@ export function HabitTracker({
     const name = String(formData.get("name") ?? "");
     const icon = String(formData.get("icon") ?? DEFAULT_HABIT_ICON);
     const color = String(formData.get("color") ?? COLORS[0]);
-    const category = String(
-      formData.get("category") ?? DEFAULT_HABIT_CATEGORY,
-    );
+    const category = String(formData.get("category") ?? DEFAULT_HABIT_CATEGORY);
     setStatus(null);
 
     startSavingTransition(async () => {
@@ -403,6 +425,7 @@ export function HabitTracker({
         setStatus(result.message ?? "The habit could not be deleted.");
       } else {
         setStatus("Habit and its check-ins deleted.");
+        await refreshProgress({ removeHabit: habitId });
       }
     });
   }
@@ -546,11 +569,7 @@ export function HabitTracker({
                           size={15}
                         />
                       ) : day.completed ? (
-                        <Check
-                          aria-hidden="true"
-                          size={15}
-                          strokeWidth={2.5}
-                        />
+                        <Check aria-hidden="true" size={15} strokeWidth={2.5} />
                       ) : (
                         <span aria-hidden="true" />
                       )}

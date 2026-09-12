@@ -1,3 +1,4 @@
+import { ProgressCard } from "@/components/progress-card";
 import type { Metadata } from "next";
 
 import { HabitTracker } from "@/components/habit-tracker";
@@ -20,6 +21,7 @@ export default async function HabitsPage() {
         title="Habits"
         description="Track each day, then edit, categorise, or remove habits when needed."
       />
+      <ProgressCard />
       <HabitTracker
         initialHabits={result.habits}
         error={result.error}

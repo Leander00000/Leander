@@ -1,15 +1,10 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-
-import { getAppMode } from "@/lib/config";
-import { createClient } from "@/lib/supabase/server";
+import { DEVICE_COOKIE } from "@/lib/device-token";
 
 export async function signOutAction() {
-  if (getAppMode() === "connected") {
-    const supabase = await createClient();
-    await supabase.auth.signOut();
-  }
-
+  (await cookies()).delete(DEVICE_COOKIE);
   redirect("/login");
 }

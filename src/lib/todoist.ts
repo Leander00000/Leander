@@ -5,10 +5,7 @@ const TODOIST_PAGE_LIMIT = 200;
 const MAX_PAGES = 100;
 
 export type TodoistTaskFilter =
-  | "today"
-  | "overdue"
-  | "today | overdue"
-  | "7 days";
+  "today" | "overdue" | "today | overdue" | "7 days";
 export type TodoistPriority = 1 | 2 | 3 | 4;
 export type TodoistDurationUnit = "minute" | "day";
 
@@ -96,7 +93,9 @@ function isNullableString(value: unknown): value is string | null {
 }
 
 function isStringArray(value: unknown): value is string[] {
-  return Array.isArray(value) && value.every((item) => typeof item === "string");
+  return (
+    Array.isArray(value) && value.every((item) => typeof item === "string")
+  );
 }
 
 function isInteger(value: unknown): value is number {
@@ -227,10 +226,7 @@ function getToken(): string {
   const token = process.env.TODOIST_API_TOKEN?.trim();
 
   if (!token) {
-    throw new TodoistApiError(
-      "CONFIGURATION",
-      "Todoist is not configured.",
-    );
+    throw new TodoistApiError("CONFIGURATION", "Todoist is not configured.");
   }
 
   return token;
@@ -270,7 +266,10 @@ function getHttpError(status: number): TodoistApiError {
   );
 }
 
-async function request(path: string, init: RequestInit = {}): Promise<Response> {
+async function request(
+  path: string,
+  init: RequestInit = {},
+): Promise<Response> {
   const token = getToken();
   let response: Response;
 
@@ -287,10 +286,7 @@ async function request(path: string, init: RequestInit = {}): Promise<Response> 
       },
     });
   } catch {
-    throw new TodoistApiError(
-      "NETWORK",
-      "Todoist could not be reached.",
-    );
+    throw new TodoistApiError("NETWORK", "Todoist could not be reached.");
   }
 
   if (!response.ok) {
@@ -405,39 +401,34 @@ export async function quickAddTask(text: string): Promise<TodoistTask> {
   return parseTask(await readRequiredJson(response));
 }
 
-export async function closeTask(taskId: string): Promise<void> {
-  const normalizedTaskId = taskId.trim();
-
-  if (!normalizedTaskId) {
-    throw new TodoistApiError(
-      "INVALID_INPUT",
-      "A Todoist task ID is required.",
-    );
-  }
-
-  const response = await request(
-    `/tasks/${encodeURIComponent(normalizedTaskId)}/close`,
-    { method: "POST" },
+export async function getTask(taskId: string): Promise<TodoistTask> {
+  return parseTask(
+    await readRequiredJson(
+      await request(`/tasks/${encodeURIComponent(taskId)}`),
+    ),
   );
-  const body = await response.text();
+}
 
-  if (body.trim()) {
-    let parsed: unknown;
-
-    try {
-      parsed = JSON.parse(body) as unknown;
-    } catch {
-      throw new TodoistApiError(
-        "INVALID_RESPONSE",
-        "Todoist returned an unexpected response.",
-      );
-    }
-
-    if (parsed !== null) {
-      throw new TodoistApiError(
-        "INVALID_RESPONSE",
-        "Todoist returned an unexpected response.",
-      );
-    }
+// A stable command UUID makes retries safe for recurring tasks too.
+export async function closeTask(
+  taskId: string,
+  commandId: string,
+): Promise<void> {
+  const response = await request("/sync", {
+    method: "POST",
+    body: JSON.stringify({
+      commands: [{ type: "item_close", uuid: commandId, args: { id: taskId } }],
+    }),
+  });
+  const body = await readRequiredJson(response);
+  if (
+    !isRecord(body) ||
+    !isRecord(body.sync_status) ||
+    body.sync_status[commandId] !== "ok"
+  ) {
+    throw new TodoistApiError(
+      "UPSTREAM",
+      "Todoist did not confirm completion.",
+    );
   }
 }

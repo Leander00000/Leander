@@ -3,8 +3,7 @@ import "server-only";
 import { redirect } from "next/navigation";
 
 import { getAppMode } from "@/lib/config";
-import { isOwnerOAuthSession } from "@/lib/owner-session";
-import { createClient } from "@/lib/supabase/server";
+import { getDeviceAccessConfig, hasDeviceAccess } from "@/lib/device-access";
 import type { Viewer } from "@/lib/types";
 
 const DEMO_VIEWER: Viewer = {
@@ -25,26 +24,13 @@ export async function getViewer(): Promise<Viewer | null> {
     return null;
   }
 
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.getClaims();
-
-  if (error || !data?.claims) {
-    return null;
-  }
-
-  if (!isOwnerOAuthSession(data.claims)) {
-    return null;
-  }
-
-  const id = typeof data.claims.sub === "string" ? data.claims.sub : "";
-
-  if (!id) {
-    return null;
-  }
+  const access = getDeviceAccessConfig();
+  if (!access || !(await hasDeviceAccess())) return null;
+  const id = access.owner;
 
   return {
     id,
-    email: "Single private profile",
+    email: "Remembered device",
     name: "Leander",
     isDemo: false,
   };

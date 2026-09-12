@@ -1,3 +1,4 @@
+import { ProgressCard } from "@/components/progress-card";
 import { AgendaCard } from "@/components/agenda-card";
 import { HabitTracker } from "@/components/habit-tracker";
 import { PageHeader } from "@/components/page-header";
@@ -27,6 +28,7 @@ export default async function TodayPage() {
         badge={viewer.isDemo ? "Preview" : undefined}
       />
 
+      <ProgressCard />
       <div className="today-grid">
         <div className="today-main-column">
           <TodoistCard

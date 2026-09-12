@@ -1,5 +1,6 @@
 import "server-only";
 
+import { requireViewer } from "@/lib/auth";
 import { getAppMode } from "@/lib/config";
 import { getDateKey } from "@/lib/date";
 import { demoTodayTasks, demoUpcomingTasks } from "@/lib/demo-data";
@@ -77,6 +78,7 @@ export function toDashboardTask(task: TodoistTask): DashboardTask {
     content: task.content,
     description: task.description || undefined,
     priority: task.priority,
+    completionCount: task.completed_count,
     dueDate,
     dueLabel: getDueLabel(task, dueDate, overdue),
     overdue,
@@ -100,6 +102,7 @@ function getErrorMessage(error: unknown) {
 }
 
 export async function getTasks(): Promise<TasksResult> {
+  await requireViewer();
   if (getAppMode() === "demo") {
     return {
       todayTasks: demoTodayTasks,

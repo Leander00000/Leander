@@ -1,34 +1,27 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import "server-only";
 
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { hasSupabaseConfig } from "@/lib/config";
-import { SUPABASE_COOKIE_OPTIONS } from "@/lib/supabase/cookie-options";
+import { hasDeviceAccess } from "@/lib/device-access";
 
+// Privileged credentials never leave the server. Every caller must scope queries
+// to the configured owner; a verified device cookie is mandatory even for reads.
 export async function createClient() {
-  if (!hasSupabaseConfig()) {
-    throw new Error("Supabase is not configured.");
+  if (
+    !hasSupabaseConfig() ||
+    !process.env.SUPABASE_SECRET_KEY ||
+    !(await hasDeviceAccess())
+  ) {
+    throw new Error("Private dashboard access is required.");
   }
-
-  const cookieStore = await cookies();
-
-  return createServerClient(
+  return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    process.env.SUPABASE_SECRET_KEY,
     {
-      cookieOptions: SUPABASE_COOKIE_OPTIONS,
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
-            });
-          } catch {
-            // Server Components cannot write cookies. The request proxy refreshes them.
-          }
-        },
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
       },
     },
   );
