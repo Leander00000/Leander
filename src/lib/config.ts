@@ -1,3 +1,5 @@
+import { getDeviceAccessConfig } from "@/lib/device-access";
+
 export type AppMode = "connected" | "demo" | "unconfigured";
 
 function getValidatedOrigin(value: string) {
@@ -25,7 +27,7 @@ function getValidatedOrigin(value: string) {
 export function hasSupabaseConfig() {
   return Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
   );
 }
 
@@ -37,7 +39,13 @@ export function getAppMode(): AppMode {
     return "demo";
   }
 
-  if (hasSupabaseConfig() && hasPrivateOwner) {
+  if (
+    hasSupabaseConfig() &&
+    hasPrivateOwner &&
+    getDeviceAccessConfig() &&
+    process.env.SUPABASE_SECRET_KEY?.trim() &&
+    getAppOrigin()
+  ) {
     return "connected";
   }
 

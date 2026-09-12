@@ -1,92 +1,33 @@
-import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-
 import { getAppMode } from "@/lib/config";
-import { isOwnerOAuthSession } from "@/lib/owner-session";
-import { SUPABASE_COOKIE_OPTIONS } from "@/lib/supabase/cookie-options";
-
-const PUBLIC_PATHS = ["/auth", "/login", "/setup"];
-
-function isPublicPath(pathname: string) {
-  return PUBLIC_PATHS.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`),
-  );
-}
-
-function redirectWithSessionCookies(
-  request: NextRequest,
-  response: NextResponse,
-  pathname: string,
-) {
-  const url = request.nextUrl.clone();
-  url.pathname = pathname;
-  url.search = "";
-
-  const redirectResponse = NextResponse.redirect(url);
-  response.cookies.getAll().forEach((cookie) => {
-    redirectResponse.cookies.set(cookie);
-  });
-  return redirectResponse;
-}
+import { getDeviceAccessConfig } from "@/lib/device-access";
+import { DEVICE_COOKIE, verifyDeviceToken } from "@/lib/device-token";
 
 export async function updateSession(request: NextRequest) {
   const mode = getAppMode();
-  const pathname = request.nextUrl.pathname;
-
-  if (mode === "demo") {
-    return NextResponse.next({ request });
+  const path = request.nextUrl.pathname;
+  let target: string | null = null;
+  if (mode === "unconfigured" && path !== "/setup") target = "/setup";
+  if (mode === "connected") {
+    const access = getDeviceAccessConfig()!;
+    const allowed = verifyDeviceToken(
+      request.cookies.get(DEVICE_COOKIE)?.value,
+      access.secret,
+      access.owner,
+    );
+    const publicPath = ["/login", "/auth/device", "/setup"].includes(path);
+    if (!allowed && !publicPath) target = "/login";
+    if (allowed && path === "/login") target = "/";
   }
-
-  if (mode === "unconfigured") {
-    if (pathname === "/setup") {
-      return NextResponse.next({ request });
-    }
-
-    const setupUrl = request.nextUrl.clone();
-    setupUrl.pathname = "/setup";
-    return NextResponse.redirect(setupUrl);
+  const url = request.nextUrl.clone();
+  if (target) {
+    url.pathname = target;
+    url.search = "";
   }
-
-  let response = NextResponse.next({ request });
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    {
-      cookieOptions: SUPABASE_COOKIE_OPTIONS,
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet, headersToSet) {
-          cookiesToSet.forEach(({ name, value }) => {
-            request.cookies.set(name, value);
-          });
-
-          response = NextResponse.next({ request });
-
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
-          });
-
-          Object.entries(headersToSet).forEach(([key, value]) => {
-            response.headers.set(key, value);
-          });
-        },
-      },
-    },
-  );
-
-  const { data } = await supabase.auth.getClaims();
-  const claims = data?.claims;
-  const isOwner = isOwnerOAuthSession(claims);
-
-  if (!isOwner && !isPublicPath(pathname)) {
-    return redirectWithSessionCookies(request, response, "/login");
-  }
-
-  if (isOwner && pathname === "/login") {
-    return redirectWithSessionCookies(request, response, "/");
-  }
-
+  const response = target
+    ? NextResponse.redirect(url)
+    : NextResponse.next({ request });
+  response.headers.set("Cache-Control", "private, no-store");
+  response.headers.set("Referrer-Policy", "no-referrer");
   return response;
 }

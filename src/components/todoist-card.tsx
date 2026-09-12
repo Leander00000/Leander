@@ -9,17 +9,10 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import {
-  useMemo,
-  useRef,
-  useState,
-  useTransition,
-} from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 
-import {
-  completeTaskAction,
-  quickAddTaskAction,
-} from "@/app/actions/todoist";
+import { completeTaskAction, quickAddTaskAction } from "@/app/actions/todoist";
+import { useProgress } from "@/components/progress-provider";
 import { getDateKey } from "@/lib/date";
 import type { DashboardTask, IntegrationState } from "@/lib/types";
 
@@ -91,6 +84,7 @@ function TaskRow({
           ) : null}
           {task.project ? <span>{task.project}</span> : null}
           <PriorityLabel priority={task.priority} />
+          <span className="xp-tag">+20 XP</span>
         </div>
       </div>
     </div>
@@ -104,6 +98,8 @@ export function TodoistCard({
   error,
 }: TodoistCardProps) {
   const router = useRouter();
+  const { refresh: refreshProgress } = useProgress();
+  const completing = useRef(false);
   const quickAddForm = useRef<HTMLFormElement>(null);
   const [view, setView] = useState<TaskView>("today");
   const [todayTasks, setTodayTasks] = useState(initialTodayTasks);
@@ -164,24 +160,44 @@ export function TodoistCard({
   }
 
   function completeTask(taskId: string) {
+    if (completing.current) return;
+    const task = [...todayTasks, ...upcomingTasks].find(
+      (item) => item.id === taskId,
+    );
+    if (!task) return;
+    completing.current = true;
     const previousToday = todayTasks;
     const previousUpcoming = upcomingTasks;
     setStatus(null);
-    setTodayTasks((current) =>
-      current.filter((task) => task.id !== taskId),
-    );
-    setUpcomingTasks((current) =>
-      current.filter((task) => task.id !== taskId),
-    );
+    setTodayTasks((current) => current.filter((task) => task.id !== taskId));
+    setUpcomingTasks((current) => current.filter((task) => task.id !== taskId));
 
     startTransition(async () => {
-      const result = await completeTaskAction(taskId);
-      if (!result.ok) {
+      try {
+        const result = await completeTaskAction(
+          taskId,
+          task.completionCount ?? 0,
+        );
+        if (!result.ok) {
+          setTodayTasks(previousToday);
+          setUpcomingTasks(previousUpcoming);
+          setStatus(result.message ?? "The task was not completed.");
+        } else {
+          setStatus(result.message ?? "Task completed. +20 XP!");
+          await refreshProgress({
+            activity: {
+              id: `task:${taskId}:${task.completionCount ?? 0}`,
+              kind: "task",
+              date: getDateKey(),
+            },
+          });
+        }
+      } catch {
         setTodayTasks(previousToday);
         setUpcomingTasks(previousUpcoming);
-        setStatus(result.message ?? "The task was not completed.");
-      } else {
-        setStatus("Task completed.");
+        setStatus("Could not confirm completion. Try again safely.");
+      } finally {
+        completing.current = false;
       }
     });
   }
@@ -381,7 +397,7 @@ export function TodoistCard({
         </a>
       </div>
 
-      <p className="sr-status" aria-live="polite">
+      <p className="action-feedback" role="status">
         {status}
       </p>
     </section>

@@ -35,7 +35,8 @@ const GOOGLE_FEEDBACK = {
   },
   disconnected: {
     tone: "neutral",
-    message: "Google Calendar was disconnected and its saved token was removed.",
+    message:
+      "Google Calendar was disconnected and its saved token was removed.",
   },
   "disconnect-failed": {
     tone: "error",
@@ -64,7 +65,7 @@ const GOOGLE_FEEDBACK = {
   "owner-mismatch": {
     tone: "error",
     message:
-      "That is not the dashboard owner Google account. Choose the same account used to sign in.",
+      "That is not the dashboard owner Google account. Choose your configured owner account.",
   },
   "permission-denied": {
     tone: "error",
@@ -83,7 +84,8 @@ const GOOGLE_FEEDBACK = {
   },
   "session-expired": {
     tone: "error",
-    message: "Your dashboard session expired. Sign in, then connect again.",
+    message:
+      "Your dashboard session expired. Open your private link, then connect again.",
   },
 } as const;
 
@@ -198,7 +200,7 @@ export default async function SettingsPage({
               </span>
               <span className="setting-copy">
                 <strong>Supabase</strong>
-                <small>Private habits and browser session</small>
+                <small>Private habits and progress</small>
               </span>
               <span className="status-pill">
                 {viewer.isDemo ? "Preview" : "Connected"}
@@ -235,10 +237,7 @@ export default async function SettingsPage({
                       Reconnect
                     </a>
                     <form action={disconnectGoogleCalendarAction}>
-                      <button
-                        className="text-button danger-text"
-                        type="submit"
-                      >
+                      <button className="text-button danger-text" type="submit">
                         <Unplug aria-hidden="true" size={14} />
                         Disconnect
                       </button>
@@ -278,9 +277,15 @@ export default async function SettingsPage({
             </span>
           </div>
 
+          <p className="card-helper">
+            This device is remembered for 180 days. Open your private link on a
+            new device. Locking removes access from this browser.
+          </p>
           <div className="card-footer">
             {viewer.isDemo ? (
-              <span className="muted-copy">Sign-out is disabled in preview.</span>
+              <span className="muted-copy">
+                Sign-out is disabled in preview.
+              </span>
             ) : (
               <form action={signOutAction}>
                 <button className="text-button danger-text" type="submit">
